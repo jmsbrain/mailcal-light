@@ -21,6 +21,7 @@ fun LoginScreen() {
     var busy by rememberOnPage("busy") { mutableStateOf(false) }
     var error by rememberOnPage("error") { mutableStateOf<String?>(null) }
     val scope = LocalPageScope.current
+    val ctx = LocalLightContext.current
 
     fun signIn() {
         if (email.isBlank() || password.isEmpty()) {
@@ -30,7 +31,7 @@ fun LoginScreen() {
         busy = true
         error = null
         scope.launch {
-            runCatching { Repo.signIn(server, email, password) }
+            runCatching { Repo.signIn(ctx, server, email, password) }
                 .onSuccess { password = "" }  // This page stays around for sign-out.
                 .onFailure { error = it.message ?: "Couldn't sign in." }
             busy = false

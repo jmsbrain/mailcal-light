@@ -61,6 +61,7 @@ fun AgendaScreen(
     val loading = if (mail) s.syncing else feeds.refreshing
     val showCalendar = if (mail) s.calendars.count { !it.hidden } > 1 else feeds.feeds.count { !it.hidden } > 1
     var confirmSignOut by remember { mutableStateOf(false) }
+    val ctx = LocalLightContext.current
     var showError by remember { mutableStateOf(false) }
 
     val rows = remember(items, today) {
@@ -136,7 +137,7 @@ fun AgendaScreen(
                     Gap(6f)
                     BasicText("Sign out? This only removes the copy on this phone; your calendar stays on mailbox.org.", style = paragraphStyle())
                     Row {
-                        TextButton("SIGN OUT") { Repo.signOut() }
+                        TextButton("SIGN OUT") { Repo.signOut(ctx) }
                         HGap(32f)
                         TextButton("CANCEL") { confirmSignOut = false }
                     }

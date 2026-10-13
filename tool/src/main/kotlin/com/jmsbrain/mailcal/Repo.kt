@@ -56,7 +56,6 @@ object Repo {
 
     private lateinit var prefs: Prefs
     private lateinit var cacheDir: File
-    private lateinit var appContext: SealedLightContext
     private val lock = Mutex()
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var dav: CalDav? = null
@@ -73,7 +72,6 @@ object Repo {
     @Synchronized
     fun init(context: SealedLightContext) {
         if (::prefs.isInitialized) return
-        appContext = context
         prefs = Prefs(File(context.filesDir, "mailcal.json"))
         cacheDir = File(context.filesDir, "calendars").apply { mkdirs() }
         val account = loadAccount()
@@ -92,13 +90,13 @@ object Repo {
     }
 
     /** Keeps the background refresh scheduled; called when the app opens. */
-    fun scheduleSync() {
-        if (_state.value.account != null) SyncWorker.start(appContext)
+    fun scheduleSync(ctx: SealedLightContext) {
+        if (_state.value.account != null) SyncWorker.start(ctx)
     }
 
     // ---- account ----
 
-    suspend fun signIn(server: String, user: String, password: String) = withContext(Dispatchers.IO) {
+    suspend fun signIn(ctx: SealedLightContext, server: String, user: String, password: String) = withContext(Dispatchers.IO) {
         val client = CalDav(user.trim(), password)
         val home = client.findHome(server.ifBlank { DEFAULT_SERVER })
         val cals = client.calendars(home)
@@ -118,11 +116,11 @@ object Repo {
         }
         // Outlives the sign-in screen.
         appScope.launch { sync() }
-        SyncWorker.start(appContext)
+        SyncWorker.start(ctx)
     }
 
-    fun signOut() {
-        SyncWorker.stop(appContext)
+    fun signOut(ctx: SealedLightContext) {
+        SyncWorker.stop(ctx)
         prefs.clear()
         cacheDir.listFiles()?.forEach { it.delete() }
         resources.clear()

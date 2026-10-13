@@ -16,6 +16,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import com.thelightphone.sdk.InitialScreen
 import com.thelightphone.sdk.SealedLightActivity
+import com.thelightphone.sdk.SealedLightContext
 import com.thelightphone.sdk.SimpleLightScreen
 import com.thelightphone.sdk.rememberKeyboardOptions
 import com.thelightphone.sdk.ui.LightTextInputEditor
@@ -23,6 +24,7 @@ import com.thelightphone.sdk.ui.LightTheme
 import com.thelightphone.sdk.ui.LightThemeController
 import com.thelightphone.sdk.ui.LightThemeTokens
 import java.time.LocalDate
+import java.time.LocalTime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -36,6 +38,17 @@ val LocalTextEditor = staticCompositionLocalOf<TextEditor> { error("No page") }
 
 /** Lives as long as the page, not just while it's on screen. */
 val LocalPageScope = staticCompositionLocalOf<CoroutineScope> { error("No page") }
+
+/** The page's SDK context, for background jobs. */
+val LocalLightContext = staticCompositionLocalOf<SealedLightContext> { error("No page") }
+
+/** Opens the date and time pickers as pages, so back only closes the picker. */
+interface Pickers {
+    fun date(selected: LocalDate, onPick: (LocalDate) -> Unit)
+    fun time(selected: LocalTime, onPick: (LocalTime) -> Unit)
+}
+
+val LocalPickers = staticCompositionLocalOf<Pickers> { error("No page") }
 
 private val LocalPageStore = staticCompositionLocalOf<MutableMap<String, Any?>> { error("No page") }
 
@@ -57,6 +70,13 @@ abstract class Page<R>(sealedActivity: SealedLightActivity) : SimpleLightScreen<
     private val editor = TextEditor { title, value, singleLine, caps, onDone ->
         navigateTo({ TextEditPage(it, title, value, singleLine, caps) }) { onDone(it) }
     }
+    private val pickers = object : Pickers {
+        override fun date(selected: LocalDate, onPick: (LocalDate) -> Unit) =
+            navigateTo({ DatePickerPage(it, selected) }) { onPick(it) }
+
+        override fun time(selected: LocalTime, onPick: (LocalTime) -> Unit) =
+            navigateTo({ TimePickerPage(it, selected) }) { onPick(it) }
+    }
 
     @Composable
     abstract fun Body()
@@ -68,6 +88,8 @@ abstract class Page<R>(sealedActivity: SealedLightActivity) : SimpleLightScreen<
                 LocalTextEditor provides editor,
                 LocalPageScope provides scope,
                 LocalPageStore provides store,
+                LocalLightContext provides lightContext,
+                LocalPickers provides pickers,
             ) { Body() }
         }
     }
@@ -76,7 +98,7 @@ abstract class Page<R>(sealedActivity: SealedLightActivity) : SimpleLightScreen<
         // Pages also show when one above them closes; that isn't opening the app.
         if (!paused) return
         paused = false
-        appOpened()
+        appOpened(lightContext)
     }
 
     override fun onAppPause() {
@@ -92,7 +114,7 @@ abstract class Page<R>(sealedActivity: SealedLightActivity) : SimpleLightScreen<
     }
 }
 
-private fun appOpened() {
+private fun appOpened(ctx: SealedLightContext) {
     // Refresh on open, at most every few minutes.
     val s = Repo.state.value
     val stale = (s.updatedAt ?: 0) < System.currentTimeMillis() - 5 * 60_000
@@ -100,7 +122,7 @@ private fun appOpened() {
     else Repo.rebuild()  // The day may have changed.
     Feeds.rebuild()
     Repo.refreshFeedsIfStale()
-    Repo.scheduleSync()
+    Repo.scheduleSync(ctx)
 }
 
 @InitialScreen
@@ -219,4 +241,14 @@ class TextEditPage(
             )
         }
     }
+}
+
+class DatePickerPage(sealedActivity: SealedLightActivity, private val selected: LocalDate) : Page<LocalDate>(sealedActivity) {
+    @Composable
+    override fun Body() = DatePicker(selected, onCancel = { goBack() }, onPick = { goBack(it) })
+}
+
+class TimePickerPage(sealedActivity: SealedLightActivity, private val selected: LocalTime) : Page<LocalTime>(sealedActivity) {
+    @Composable
+    override fun Body() = TimePicker(selected, onCancel = { goBack() }, onPick = { goBack(it) })
 }

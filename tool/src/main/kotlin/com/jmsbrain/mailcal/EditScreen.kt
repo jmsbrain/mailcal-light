@@ -33,8 +33,6 @@ import java.time.temporal.ChronoUnit
 import java.util.Locale
 import kotlinx.coroutines.launch
 
-private enum class Pick { StartDate, StartTime, EndDate, EndTime }
-
 private val fieldDate = DateTimeFormatter.ofPattern("EEE, MMM d, yyyy", Locale.US)
 
 /** New event ([item] null), the whole event, or one repeat ([one]). */
@@ -48,15 +46,15 @@ fun EditScreen(
     onSaved: () -> Unit,
 ) {
     val zone = ZoneId.systemDefault()
-    // Kept by the page so it survives the text editor.
+    // Kept by the page so it survives the editor and pickers.
     val original = rememberOnPage("original") { initialDraft(item, one, day, zone) }
     var d by rememberOnPage("draft") { mutableStateOf(original) }
     var cal by rememberOnPage("cal") { mutableStateOf(item?.cal?.url ?: s.defaultCal ?: s.calendars.firstOrNull { !it.info.readOnly }?.info?.url) }
-    var pick by rememberOnPage("pick") { mutableStateOf<Pick?>(null) }
     var busy by rememberOnPage("busy") { mutableStateOf(false) }
     var confirmDiscard by rememberOnPage("confirmDiscard") { mutableStateOf(false) }
     var error by rememberOnPage("error") { mutableStateOf<String?>(null) }
     val scope = LocalPageScope.current
+    val pickers = LocalPickers.current
     val dirty = d != original
 
     fun cancel() { if (dirty) confirmDiscard = true else onCancel() }
@@ -80,28 +78,6 @@ fun EditScreen(
                     error = it.message ?: "Couldn't save."
                 }
         }
-    }
-
-    when (pick) {
-        Pick.StartDate, Pick.EndDate -> {
-            val isStart = pick == Pick.StartDate
-            DatePicker(if (isStart) d.start.toLocalDate() else d.end.toLocalDate(), onCancel = { pick = null }) { date ->
-                d = if (isStart) moveStart(d, d.start.with(date)) else d.copy(end = d.end.with(date))
-                error = null
-                pick = null
-            }
-            return
-        }
-        Pick.StartTime, Pick.EndTime -> {
-            val isStart = pick == Pick.StartTime
-            TimePicker(if (isStart) d.start.toLocalTime() else d.end.toLocalTime(), onCancel = { pick = null }) { time ->
-                d = if (isStart) moveStart(d, d.start.with(time)) else d.copy(end = d.end.with(time))
-                error = null
-                pick = null
-            }
-            return
-        }
-        null -> Unit
     }
 
     Column(Modifier.fillMaxSize()) {
@@ -139,12 +115,12 @@ fun EditScreen(
             Field("WHERE", d.location, { d = d.copy(location = it) })
             ValueRow("ALL DAY", if (d.allDay) "Yes" else "No") { d = toggleAllDay(d) }
             Row {
-                Box(Modifier.weight(1.6f)) { ValueRow("STARTS", d.start.format(fieldDate)) { pick = Pick.StartDate } }
-                if (!d.allDay) Box(Modifier.weight(1f)) { ValueRow("", clock(d.start.toLocalTime())) { pick = Pick.StartTime } }
+                Box(Modifier.weight(1.6f)) { ValueRow("STARTS", d.start.format(fieldDate)) { pickers.date(d.start.toLocalDate()) { d = moveStart(d, d.start.with(it)); error = null } } }
+                if (!d.allDay) Box(Modifier.weight(1f)) { ValueRow("", clock(d.start.toLocalTime())) { pickers.time(d.start.toLocalTime()) { d = moveStart(d, d.start.with(it)); error = null } } }
             }
             Row {
-                Box(Modifier.weight(1.6f)) { ValueRow("ENDS", d.end.format(fieldDate)) { pick = Pick.EndDate } }
-                if (!d.allDay) Box(Modifier.weight(1f)) { ValueRow("", clock(d.end.toLocalTime())) { pick = Pick.EndTime } }
+                Box(Modifier.weight(1.6f)) { ValueRow("ENDS", d.end.format(fieldDate)) { pickers.date(d.end.toLocalDate()) { d = d.copy(end = d.end.with(it)); error = null } } }
+                if (!d.allDay) Box(Modifier.weight(1f)) { ValueRow("", clock(d.end.toLocalTime())) { pickers.time(d.end.toLocalTime()) { d = d.copy(end = d.end.with(it)); error = null } } }
             }
             if (!one) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -225,7 +201,7 @@ private fun toggleAllDay(d: Draft): Draft =
 private val monthFmt = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.US)
 
 @Composable
-private fun DatePicker(selected: LocalDate, onCancel: () -> Unit, onPick: (LocalDate) -> Unit) {
+fun DatePicker(selected: LocalDate, onCancel: () -> Unit, onPick: (LocalDate) -> Unit) {
     var month by remember { mutableStateOf(YearMonth.from(selected)) }
     val today = LocalDate.now()
     Column(Modifier.fillMaxSize()) {
@@ -278,7 +254,7 @@ private fun DatePicker(selected: LocalDate, onCancel: () -> Unit, onPick: (Local
 }
 
 @Composable
-private fun TimePicker(selected: LocalTime, onCancel: () -> Unit, onPick: (LocalTime) -> Unit) {
+fun TimePicker(selected: LocalTime, onCancel: () -> Unit, onPick: (LocalTime) -> Unit) {
     val times = remember(selected) {
         val t = selected.withSecond(0).withNano(0)
         ((0 until 96).map { LocalTime.of(it / 4, (it % 4) * 15) } + t).distinct().sorted()

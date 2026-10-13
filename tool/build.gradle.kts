@@ -75,8 +75,6 @@ kotlin {
 
 dependencies {
     implementation(project(":sdk:client"))
-    // CalDAV needs PROPFIND/REPORT, which HttpURLConnection can't send.
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     testImplementation(libs.kotlin.test)
     ksp(libs.androidx.room.compiler)
 }

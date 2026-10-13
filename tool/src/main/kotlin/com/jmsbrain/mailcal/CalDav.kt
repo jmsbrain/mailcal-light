@@ -106,7 +106,7 @@ class CalDav(user: String, password: String) {
 
     fun get(url: String): Resource {
         val req = Request.Builder().url(url).get().build()
-        return call(req) { res -> Resource(url, res.header("ETag"), res.body!!.string()) }
+        return call(req) { res -> Resource(url, res.header("ETag"), res.body.string()) }
     }
 
     /** Creates ([etag] null) or replaces an event. Returns the new ETag if the server sent one. */
@@ -145,7 +145,7 @@ class CalDav(user: String, password: String) {
     }
 
     private fun multistatus(req: Request): List<DavResponse> = call(req) { res ->
-        val text = res.body?.string().orEmpty()
+        val text = res.body.string()
         val doc = try {
             DocumentBuilderFactory.newInstance().apply { isNamespaceAware = true }
                 .newDocumentBuilder().parse(text.byteInputStream())

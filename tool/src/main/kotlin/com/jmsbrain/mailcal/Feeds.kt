@@ -161,7 +161,7 @@ object Feeds {
         val host = hostOf(url)
         try {
             client.newCall(Request.Builder().url(url).header("Accept", "text/calendar, */*").build()).execute().use { r ->
-                return Download(r.request.url.toString(), r.code, r.body?.string().orEmpty())
+                return Download(r.request.url.toString(), r.code, r.body.string())
             }
         } catch (e: IOException) {
             throw FeedError(

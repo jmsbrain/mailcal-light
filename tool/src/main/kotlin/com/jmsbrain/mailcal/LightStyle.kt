@@ -1,7 +1,6 @@
 package com.jmsbrain.mailcal
 
 import android.graphics.fonts.SystemFonts
-import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.Composable
@@ -29,7 +28,6 @@ object LightStyle {
     val font: FontFamily by lazy { loadAkkurat() ?: FontFamily.Default }
 
     private fun loadAkkurat(): FontFamily? {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return null
         return try {
             val fonts = SystemFonts.getAvailableFonts()
                 .filter { it.file?.name?.startsWith("Akkurat", ignoreCase = true) == true }
