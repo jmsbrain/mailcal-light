@@ -70,7 +70,7 @@ fun FeedsScreen(feeds: FeedsState, onBack: () -> Unit, onEdit: (String) -> Unit)
             Gap(20f)
             feeds.feeds.forEach { f ->
                 Row(
-                    Modifier.fillMaxWidth().flatClickable { onEdit(f.id) }.padding(vertical = designDp(10f)),
+                    Modifier.fillMaxWidth().flatClickable { message = null; onEdit(f.id) }.padding(vertical = designDp(10f)),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column(Modifier.weight(1f)) {
@@ -124,7 +124,8 @@ fun FeedEditScreen(id: String, feeds: FeedsState, onBack: () -> Unit) {
             val current = Feeds.feed(id) ?: original
             val changedUrl = current.url != url.trim()
             Feeds.save(current.copy(name = name.trim().ifBlank { Feeds.hostOf(Feeds.httpUrl(url)) }, url = url.trim(), hidden = hidden))
-            if (changedUrl) Feeds.refresh(id)
+            // Keeps going if the page closes.
+            if (changedUrl) Repo.refreshFeed(id)
             busy = false
         }
     }

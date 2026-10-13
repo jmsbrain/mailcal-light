@@ -2,7 +2,7 @@
 
 A mailbox.org calendar for the Light Phone III: see your agenda or a month view, add, edit and delete events. Black and white, styled like LightOS.
 
-Built as a Light SDK tool (this repo is a fork of [lightphone/light-sdk](https://github.com/lightphone/light-sdk); Mailcal is the `tool` module).
+Built as a Light SDK tool on a copy of [lightphone/light-sdk](https://github.com/lightphone/light-sdk); Mailcal is the `tool` module.
 
 ## How it works
 

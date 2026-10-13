@@ -143,6 +143,10 @@ object Repo {
         appScope.launch { Feeds.refreshAll(force = true) }
     }
 
+    fun refreshFeed(id: String) {
+        appScope.launch { Feeds.refresh(id) }
+    }
+
     /** Feeds older than an hour, from the app or the background job. */
     fun refreshFeedsIfStale() {
         appScope.launch { Feeds.refreshAll() }
