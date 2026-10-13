@@ -1,5 +1,7 @@
 package com.jmsbrain.mailcal
 
+import android.content.res.Configuration
+import android.util.DisplayMetrics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +17,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import com.thelightphone.sdk.InitialScreen
 import com.thelightphone.sdk.SealedLightActivity
 import com.thelightphone.sdk.SealedLightContext
@@ -29,6 +34,7 @@ import java.time.LocalTime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlin.math.roundToInt
 
 /** Opens the LightOS text editor; [onDone] gets the new text (not called on back). */
 fun interface TextEditor {
@@ -232,19 +238,41 @@ class TextEditPage(
         val text = rememberTextFieldState(initial)
         val colors by LightThemeController.colors.collectAsState()
         LightTheme(colors = colors) {
-            LightTextInputEditor(
-                title = title,
-                state = text,
-                keyboardOptionsFlow = keyboard,
-                onSubmit = { goBack(it.toString()) },
-                onBack = { goBack() },
-                modifier = Modifier.background(LightThemeTokens.colors.background),
-                submitLabel = "DONE",
-                singleLine = singleLine,
-                initialCaps = caps && initial.isEmpty(),
-            )
+            DefaultDisplaySize {
+                LightTextInputEditor(
+                    title = title,
+                    state = text,
+                    keyboardOptionsFlow = keyboard,
+                    onSubmit = { goBack(it.toString()) },
+                    onBack = { goBack() },
+                    modifier = Modifier.background(LightThemeTokens.colors.background),
+                    submitLabel = "DONE",
+                    singleLine = singleLine,
+                    initialCaps = caps && initial.isEmpty(),
+                )
+            }
         }
     }
+}
+
+/** The phone's default display size. A smaller Display size setting shrinks the SDK keyboard; LightOS's own doesn't. */
+@Composable
+private fun DefaultDisplaySize(content: @Composable () -> Unit) {
+    val current = LocalDensity.current
+    val config = LocalConfiguration.current
+    val stable = DisplayMetrics.DENSITY_DEVICE_STABLE
+    val density = stable / DisplayMetrics.DENSITY_DEFAULT.toFloat()
+    // Same pixels, counted in default-size dp (the SDK's grid sizes from these).
+    val defaultConfig = Configuration(config).apply {
+        densityDpi = stable
+        screenWidthDp = (config.screenWidthDp * current.density / density).roundToInt()
+        screenHeightDp = (config.screenHeightDp * current.density / density).roundToInt()
+    }
+    CompositionLocalProvider(
+        LocalDensity provides Density(density, current.fontScale),
+        LocalConfiguration provides defaultConfig,
+        content = content,
+    )
 }
 
 class DatePickerPage(sealedActivity: SealedLightActivity, private val selected: LocalDate) : Page<LocalDate>(sealedActivity) {
