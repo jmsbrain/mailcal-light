@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -84,13 +85,16 @@ abstract class Page<R>(sealedActivity: SealedLightActivity) : SimpleLightScreen<
     @Composable
     final override fun Content() {
         Box(Modifier.fillMaxSize().background(LightStyle.background).systemBarsPadding()) {
-            CompositionLocalProvider(
-                LocalTextEditor provides editor,
-                LocalPageScope provides scope,
-                LocalPageStore provides store,
-                LocalLightContext provides lightContext,
-                LocalPickers provides pickers,
-            ) { Body() }
+            // Every page shares this Content(), so key by page or Compose reuses the last page's state.
+            key(this@Page) {
+                CompositionLocalProvider(
+                    LocalTextEditor provides editor,
+                    LocalPageScope provides scope,
+                    LocalPageStore provides store,
+                    LocalLightContext provides lightContext,
+                    LocalPickers provides pickers,
+                ) { Body() }
+            }
         }
     }
 

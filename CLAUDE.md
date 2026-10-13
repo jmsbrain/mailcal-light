@@ -10,7 +10,8 @@ This repo is a clone of lightphone/light-sdk (remote `upstream`; not a GitHub fo
 - SDK limits are enforced at build time: no `android.app.*`, `Context`, `Intent`, `LocalContext`, `androidx.activity.*`, reflection, own `AndroidManifest.xml`, or Java in `tool/src`. Permissions and capabilities go in `tool/lighttool.toml` (allowlist in `plugin/.../LightToolMetadata.kt`).
 - Ask for as few permissions as possible. Say what leaves the phone in `tool/README.md`.
 - Keep code comments short.
-- Version: `versionName` (MAJOR.MINOR.PATCH) and `versionCode` +1 per release, in `tool/lighttool.toml`. Tag releases `vX.Y.Z`.
+- Version: `versionName` (MAJOR.MINOR.PATCH) and `versionCode` +1 per release, in `tool/lighttool.toml`. Tag releases `mailcal-light-vX.Y.Z`, never plain `vX.Y.Z`: those are Light's SDK tags, which this repo inherits.
+- Releases attach `:tool:assembleRelease` (stripped, no barcode scanner). Test that build on the emulator first: stripping can break things only at run time.
 - Commit as you go. Ask before pushing. Never force-push yourself.
 
 ## Build and install

@@ -56,6 +56,14 @@ android {
         }
     }
 
+    // Mailcal never scans barcodes; leave out the SDK's ML Kit scanner (~20 MB).
+    packaging {
+        jniLibs.excludes += "**/libbarhopper_v3.so"
+    }
+    androidResources {
+        ignoreAssetsPatterns += "!mlkit_barcode_models"
+    }
+
     lint {
         warningsAsErrors = false
         error += "RestrictedApi"
