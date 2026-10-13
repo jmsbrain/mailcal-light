@@ -1,4 +1,4 @@
-# Mailcal
+# Mailcal Light
 
 A mailbox.org calendar for the Light Phone III: see your agenda or a month view, add, edit and delete events. Black and white, styled like LightOS.
 
@@ -38,9 +38,9 @@ The password is kept on the phone, encrypted with a key in the Android Keystore,
 
 - Internet, to reach the CalDAV server and any feeds you add. Nothing else leaves the phone.
 
-## Moving from the sideloaded Mailcal
+## Alongside the Android Mailcal
 
-This version is signed differently, so uninstall the old Mailcal first and sign in again. Your calendar is on mailbox.org, so nothing is lost; subscribed feeds need adding again.
+Mailcal Light is a separate app (`com.jmsbrain.mailcal.light`), so it installs next to the sideloaded [Mailcal](https://github.com/jmsbrain/mailcal) rather than replacing it. Sign in and add feeds again; your calendar is on mailbox.org, so both see the same events.
 
 ## License
 

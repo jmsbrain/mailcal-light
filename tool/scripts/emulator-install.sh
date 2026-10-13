@@ -9,7 +9,7 @@ cd "$(dirname "$0")/../.."
 SDK="${ANDROID_HOME:-$LOCALAPPDATA/Android/Sdk}"
 ADB="$SDK/platform-tools/adb"
 SERIAL=emulator-5554
-TOOL=com.jmsbrain.mailcal
+TOOL=com.jmsbrain.mailcal.light
 TOML=tool/lighttool.toml
 
 if ! "$ADB" devices | grep -q "^$SERIAL"; then

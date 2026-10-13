@@ -1,8 +1,8 @@
 [tool]
-id = "com.jmsbrain.mailcal"
-label = "Mailcal"
-versionCode = 9
-versionName = "2.0.0"
+id = "com.jmsbrain.mailcal.light"
+label = "Mailcal Light"
+versionCode = 1
+versionName = "1.0.0"
 # CalDAV and .ics feeds only.
 permissions = ["android.permission.INTERNET"]
 # To test against tools/MockCalDav.java (plain http), temporarily use:
