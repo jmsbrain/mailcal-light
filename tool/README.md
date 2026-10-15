@@ -16,11 +16,13 @@ Mailcal talks to mailbox.org directly over CalDAV. It does **not** use DAVx5 or 
 
 ## Feeds
 
-Mailcal can also show subscribed .ics feeds, read-only. Switch between **MAILBOX** and **FEEDS** by tapping the tabs under the top bar, or in month view by tapping the selected day again. Add feeds from MENU → FEEDS by typing or pasting a link; Google share links work for public calendars. Feeds refresh hourly, when the app opens and in the background.
+Mailcal can also show subscribed .ics feeds, read-only. Switch between **MAILBOX** and **FEEDS** by tapping the tabs under the top bar. Add feeds from the settings gear → FEEDS by typing or pasting a link; Google share links work for public calendars. Feeds refresh hourly, when the app opens and in the background.
 
-## Month view
+## Days and months
 
-Tap MONTH on the agenda for a month grid. Days with events get a dot per event (up to three). Tap a day to list its events under the grid; PREV/NEXT change months. NEW starts on the selected day. LIST goes back, and the app remembers which view you used last.
+Like the LightOS calendar, Mailcal shows one day at a time, starting with today. **<** and **>** beside MAILBOX · FEEDS go back and forward a day; TODAY jumps back to today. The circled **+** adds an event on the day shown. The gear holds when the calendar last updated, REFRESH, CALENDARS (or FEEDS) and SIGN OUT.
+
+Tap MONTH for a month grid, with a dot per event (up to three). **<** and **>** change months; tap a date to see that day.
 
 ## Reminders
 

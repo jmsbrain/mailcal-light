@@ -296,9 +296,6 @@ object Repo {
         rebuild()
     }
 
-    fun monthView() = prefs.getBoolean("month", false)
-    fun setMonthView(on: Boolean) = prefs.put("month" to on)
-
     fun setDefault(url: String) {
         prefs.put("default" to url)
         _state.update { it.copy(defaultCal = url) }

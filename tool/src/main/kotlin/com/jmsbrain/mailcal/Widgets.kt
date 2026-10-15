@@ -1,5 +1,6 @@
 package com.jmsbrain.mailcal
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
@@ -20,6 +22,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -28,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
+import com.thelightphone.sdk.ui.LightIconConfiguration
 
 @Composable
 fun TextButton(label: String, enabled: Boolean = true, onClick: () -> Unit) {
@@ -37,6 +43,21 @@ fun TextButton(label: String, enabled: Boolean = true, onClick: () -> Unit) {
         modifier = Modifier
             .flatClickable { if (enabled) onClick() }
             .padding(vertical = designDp(6f)),
+    )
+}
+
+/** A Light SDK icon as a button, in the app's colours. [mirror] flips it, so the back chevron also points right. */
+@Composable
+fun IconButton(icon: LightIconConfiguration, label: String, sizePx: Float = 34f, mirror: Boolean = false, onClick: () -> Unit) {
+    Image(
+        painterResource(icon.drawableResource),
+        contentDescription = label,
+        colorFilter = ColorFilter.tint(LightStyle.content),
+        modifier = Modifier
+            .flatClickable(onClick)
+            .padding(designDp(4f))
+            .size(designDp(sizePx))
+            .graphicsLayer { if (mirror) scaleX = -1f },
     )
 }
 
@@ -109,10 +130,14 @@ fun ValueRow(label: String, value: String, onClick: (() -> Unit)?) {
 
 /** Text button with a dropdown menu. */
 @Composable
-fun MenuButton(label: String, items: List<Pair<String, () -> Unit>>) {
+fun MenuButton(label: String, items: List<Pair<String, () -> Unit>>) = MenuAnchor(items) { open -> TextButton(label, onClick = open) }
+
+/** A menu opened by tapping [anchor]. */
+@Composable
+fun MenuAnchor(items: List<Pair<String, () -> Unit>>, anchor: @Composable (open: () -> Unit) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     Box {
-        TextButton(label) { expanded = true }
+        anchor { expanded = true }
         if (expanded) {
             Popup(
                 popupPositionProvider = DropdownPosition(alignEnd = true),

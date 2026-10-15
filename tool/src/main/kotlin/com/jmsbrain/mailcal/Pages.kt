@@ -143,7 +143,8 @@ class HomePage(sealedActivity: SealedLightActivity) : Page<Unit>(sealedActivity)
     }
 
     private var source by mutableStateOf(Repo.source())
-    private var month by mutableStateOf(Repo.monthView())
+    // Opens on today's day view; MONTH is only a way to pick a date.
+    private var month by mutableStateOf(false)
     private var selected by mutableStateOf(LocalDate.now())
 
     @Composable
@@ -164,7 +165,7 @@ class HomePage(sealedActivity: SealedLightActivity) : Page<Unit>(sealedActivity)
             onSource = { source = it; Repo.setSource(it) },
             onFeeds = { navigateTo(::FeedsPage) },
             month = month,
-            onMonthChange = { month = it; Repo.setMonthView(it) },
+            onMonthChange = { month = it },
             selected = selected,
             onSelect = { selected = it },
         )
