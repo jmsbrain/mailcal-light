@@ -27,6 +27,9 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
+/** The chevron only fills part of its icon, so it's drawn larger to look the size of + and the gear. */
+private const val ARROW = 46f
+
 /** Where the agenda's events come from. */
 enum class Source { Mailbox, Feeds }
 
@@ -97,13 +100,13 @@ fun AgendaScreen(
             // < MAILBOX · FEEDS >
             Box(Modifier.fillMaxWidth()) {
                 Box(Modifier.align(Alignment.CenterStart)) {
-                    IconButton(LightIcons.BACK, if (month) "Previous month" else "Previous day", sizePx = 26f) {
+                    IconButton(LightIcons.BACK, if (month) "Previous month" else "Previous day", sizePx = ARROW) {
                         onSelect(if (month) selected.minusMonths(1) else selected.minusDays(1))
                     }
                 }
                 SourceTabs(source, onSource, Modifier.align(Alignment.Center))
                 Box(Modifier.align(Alignment.CenterEnd)) {
-                    IconButton(LightIcons.BACK, if (month) "Next month" else "Next day", sizePx = 26f, mirror = true) {
+                    IconButton(LightIcons.BACK, if (month) "Next month" else "Next day", sizePx = ARROW, mirror = true) {
                         onSelect(if (month) selected.plusMonths(1) else selected.plusDays(1))
                     }
                 }
